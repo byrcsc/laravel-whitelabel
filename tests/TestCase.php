@@ -15,13 +15,21 @@ abstract class TestCase extends Orchestra
     use WithWorkbench;
 
     /**
+     * Spatie's provider is named as a string and only registered when it is
+     * installed, so the no-Spatie CI job boots the same test case unchanged.
+     */
+    private const MULTITENANCY_PROVIDER = 'Spatie\Multitenancy\MultitenancyServiceProvider';
+
+    /**
      * @return array<int, class-string>
      */
     protected function getPackageProviders($app): array
     {
-        return [
-            WhitelabelServiceProvider::class,
-        ];
+        if (class_exists(self::MULTITENANCY_PROVIDER)) {
+            return [WhitelabelServiceProvider::class, self::MULTITENANCY_PROVIDER];
+        }
+
+        return [WhitelabelServiceProvider::class];
     }
 
     /**

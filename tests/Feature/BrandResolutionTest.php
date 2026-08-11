@@ -14,7 +14,8 @@ use Byrcsc\Whitelabel\Resolvers\OverrideResolver;
 use Byrcsc\Whitelabel\Resolvers\TenantResolver;
 use Byrcsc\Whitelabel\Tests\Fixtures\FixedBrandResolver;
 use Byrcsc\Whitelabel\Whitelabel;
-use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Events\Looping;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -185,7 +186,21 @@ describe('override and forget', function (): void {
         $brand = new Brand('adhoc', ['name' => 'Ad hoc']);
 
         expect(whitelabel()->activate($brand)->id())->toBe('adhoc')
-            ->and(whitelabel()->current())->toBe($brand);
+            ->and(whitelabel()->current()?->name())->toBe('Ad hoc');
+    });
+
+    it('gives a hand-built brand the default brand to fall back to', function (): void {
+        whitelabel()->activate(new Brand('adhoc', ['name' => 'Ad hoc']));
+
+        expect(whitelabel()->current()?->color('primary'))->toBe('#000000');
+    });
+
+    it('leaves a brand that already has a fallback alone', function (): void {
+        $other = new Brand('other', ['colors' => ['primary' => '#ffffff']]);
+
+        whitelabel()->activate(new Brand('adhoc', ['name' => 'Ad hoc'], $other));
+
+        expect(whitelabel()->current()?->color('primary'))->toBe('#ffffff');
     });
 
     it('refuses to activate an identifier that names no brand', function (): void {
@@ -324,13 +339,23 @@ describe('runtime definitions', function (): void {
             ->and(whitelabel()->current()?->id())->toBe('default');
     });
 
-    it('forgets the brand between queued jobs', function (): void {
+    it('forgets the brand after a queued job finishes', function (): void {
         whitelabel()->activate('acme');
 
-        event(new JobProcessing('sync', new SyncJob(app(), '{}', 'sync', 'default')));
+        $payload = json_encode(['job' => 'ExampleJob', 'data' => []], JSON_THROW_ON_ERROR);
+
+        event(new JobProcessed('sync', new SyncJob(app(), $payload, 'sync', 'default')));
 
         expect(whitelabel()->isResolved())->toBeFalse()
             ->and(whitelabel()->current()?->id())->toBe('default');
+    });
+
+    it('forgets the brand before the worker picks up its next job', function (): void {
+        whitelabel()->activate('acme');
+
+        event(new Looping('sync', 'default'));
+
+        expect(whitelabel()->isResolved())->toBeFalse();
     });
 });
 

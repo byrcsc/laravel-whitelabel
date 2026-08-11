@@ -345,10 +345,72 @@ tenant model and register the switch task:
 ```
 
 Making a tenant current activates its brand, in requests and in tenant-aware
-queued jobs alike. The package never touches Spatie's schema: the tenant
-decides whether its brand comes from its own columns, a JSON column, or a
-`brand_id` into the package's table. Without Spatie installed, the
-integration classes are simply never registered.
+queued jobs alike. Forgetting the tenant deactivates it. A tenant that does not
+implement `ProvidesBrand`, or that returns null from it, changes nothing and
+resolution carries on to the request domain and the configured default.
+
+The package never touches Spatie's schema. The tenant decides where its brand
+comes from, and all three of these are supported:
+
+```php
+use Byrcsc\Whitelabel\Brand;
+use Byrcsc\Whitelabel\Contracts\BrandRepository;
+use Byrcsc\Whitelabel\Contracts\ProvidesBrand;
+use Spatie\Multitenancy\Models\Tenant as BaseTenant;
+
+class Tenant extends BaseTenant implements ProvidesBrand
+{
+    // From the tenant's own columns.
+    public function brand(): ?Brand
+    {
+        if ($this->brand_name === null) {
+            return null;
+        }
+
+        return new Brand($this->slug, [
+            'name' => $this->brand_name,
+            'colors' => ['primary' => $this->brand_color ?? ''],
+        ]);
+    }
+
+    // From one JSON column, cast to an array.
+    public function brandFromJson(): ?Brand
+    {
+        return $this->brand_definition === null
+            ? null
+            : new Brand($this->slug, $this->brand_definition);
+    }
+
+    // From a brand_id into the package's own table.
+    public function brandFromRepository(): ?Brand
+    {
+        return $this->brand_id === null
+            ? null
+            : app(BrandRepository::class)->find($this->brand_id);
+    }
+}
+```
+
+Pick one and call it `brand()`; the other two are named apart only so they can
+sit in one example. Point `multitenancy.tenant_model` at this class — Spatie
+rehydrates the tenant through it inside a queued job, so a base tenant model
+there means no brand in the worker.
+
+A brand you build by hand does not need to carry the default brand: the
+package wires it in as the fallback when the brand becomes active, so a tenant
+that names only a colour still gets the default brand's logo and settings.
+
+Without Spatie installed nothing changes and nothing breaks. `TenantResolver`
+stays in the chain and answers with nothing: it reads the current tenant out of
+the container under the key Spatie's own config names, so it refers to no
+Spatie class at all. `SwitchTenantBrandTask` does refer to Spatie types, but
+the only thing that ever names it is your `config/multitenancy.php`, which does
+not exist unless Spatie does. CI runs the suite with the package uninstalled to
+keep it that way.
+
+The tenant wins over the request domain and the configured default, and loses
+to an explicit `Whitelabel::activate()` — that is just the shipped chain order,
+and you can change it.
 
 ## Testing helpers
 

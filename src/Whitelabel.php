@@ -214,6 +214,8 @@ class Whitelabel
      */
     private function transitionTo(?Brand $brand): ?Brand
     {
+        $brand = $brand === null ? null : $this->adopt($brand);
+
         $previous = $this->active;
 
         if ($previous?->id() === $brand?->id()) {
@@ -237,6 +239,25 @@ class Whitelabel
         }
 
         return $brand;
+    }
+
+    /**
+     * Give a brand the default brand to fall back to, if it arrived without one.
+     *
+     * Brands from the drivers already have it. Brands built by hand do not —
+     * a Spatie tenant returning `new Brand($slug, [...])` from `ProvidesBrand`
+     * is the common case — and without this they would silently lose the
+     * default brand's logo, colours, and settings the moment they went active.
+     */
+    private function adopt(Brand $brand): Brand
+    {
+        if ($brand->fallback() !== null || $brand->id() === $this->defaultBrandId()) {
+            return $brand;
+        }
+
+        $default = $this->defaultBrand();
+
+        return $default === null ? $brand : $brand->withFallback($default);
     }
 
     private function defaultBrand(): ?Brand
