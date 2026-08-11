@@ -33,6 +33,16 @@ it('rejects an unknown mail key', function (): void {
         ->toThrow(InvalidBrandDefinition::class, 'unknown key [mail.reply_to]');
 });
 
+it('rejects a from address that is not an email address', function (): void {
+    expect(fn () => BrandDefinition::validate('acme', ['mail' => ['from_address' => 'hello at acme']]))
+        ->toThrow(InvalidBrandDefinition::class, '[mail.from_address] must be an email address');
+});
+
+it('accepts a cleared from address', function (): void {
+    expect(BrandDefinition::validate('acme', ['mail' => ['from_address' => '']]))
+        ->toBe(['mail' => ['from_address' => '']]);
+});
+
 it('rejects an unknown asset key', function (): void {
     expect(fn () => BrandDefinition::validate('acme', ['logo' => ['bucket' => 'acme']]))
         ->toThrow(InvalidBrandDefinition::class, 'unknown key [logo.bucket]');

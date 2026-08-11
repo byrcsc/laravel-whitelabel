@@ -6,6 +6,7 @@ namespace Byrcsc\Whitelabel\Tests;
 
 use Byrcsc\Whitelabel\WhitelabelServiceProvider;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Support\Facades\View;
 use Orchestra\Testbench\Concerns\WithWorkbench;
 use Orchestra\Testbench\TestCase as Orchestra;
 
@@ -36,6 +37,20 @@ abstract class TestCase extends Orchestra
      * The package does not run its own migrations; applications opt in by
      * publishing them. The suite loads the shipped file directly.
      */
+    /**
+     * Views the suite renders, under their own namespace.
+     *
+     * Registered here rather than in `defineEnvironment`, which runs before
+     * the package boots: resolving the view factory that early leaves the
+     * finder holding paths the package has not added its own to yet.
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        View::addNamespace('whitelabel-tests', __DIR__.'/resources/views');
+    }
+
     protected function defineDatabaseMigrations(): void
     {
         $this->loadMigrationsFrom(

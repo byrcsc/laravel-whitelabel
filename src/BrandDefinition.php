@@ -266,6 +266,19 @@ final class BrandDefinition
             $mail[$key] = self::validateString($brandId, self::MAIL.'.'.$key, $nested);
         }
 
+        // Checked here rather than at send time. With whitelabel.mail
+        // .override_from on, a malformed address takes down every message the
+        // brand sends, and a queued one fails in a worker where nobody is
+        // looking. An empty string still means cleared.
+        if (($mail[self::MAIL_FROM_ADDRESS] ?? '') !== ''
+            && filter_var($mail[self::MAIL_FROM_ADDRESS], FILTER_VALIDATE_EMAIL) === false) {
+            throw InvalidBrandDefinition::at(
+                $brandId,
+                self::MAIL.'.'.self::MAIL_FROM_ADDRESS,
+                'must be an email address',
+            );
+        }
+
         return $mail;
     }
 

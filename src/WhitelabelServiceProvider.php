@@ -6,9 +6,14 @@ namespace Byrcsc\Whitelabel;
 
 use Byrcsc\Whitelabel\Commands\ClearBrandCacheCommand;
 use Byrcsc\Whitelabel\Contracts\BrandRepository;
+use Byrcsc\Whitelabel\Mail\BrandedMailViews;
+use Byrcsc\Whitelabel\Mail\OverrideMailSender;
 use Byrcsc\Whitelabel\Queue\BrandContext;
+use Illuminate\Contracts\Config\Repository as ConfigRepository;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Mail\Events\MessageSending;
+use Illuminate\Mail\Markdown;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
 use Illuminate\Support\Facades\Blade;
@@ -75,6 +80,26 @@ class WhitelabelServiceProvider extends PackageServiceProvider
 
         $this->forgetBrandBetweenUnitsOfWork();
         $this->carryBrandIntoQueuedWork();
+        $this->brandOutgoingMail();
+    }
+
+    /**
+     * Put the brand into markdown mail, and optionally onto the envelope.
+     */
+    private function brandOutgoingMail(): void
+    {
+        $views = new BrandedMailViews($this->app->make(ConfigRepository::class));
+        $path = __DIR__.'/../resources/views/mail';
+
+        // callAfterResolving, not a config append: Markdown is a singleton that
+        // reads mail.markdown.paths once, in its constructor, so anything that
+        // resolved it before this package booted would never see the branding.
+        $this->callAfterResolving(
+            Markdown::class,
+            static fn (Markdown $markdown) => $views->applyTo($markdown, $path),
+        );
+
+        $this->app->make(Dispatcher::class)->listen(MessageSending::class, OverrideMailSender::class);
     }
 
     /**

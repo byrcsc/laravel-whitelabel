@@ -48,6 +48,32 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Mail
+    |--------------------------------------------------------------------------
+    |
+    | "markdown" puts the brand's logo in the header of Laravel's markdown mail
+    | and paints the primary button in the brand's colour. Turn it off to leave
+    | markdown mail exactly as Laravel renders it. Views you have published to
+    | resources/views/vendor/mail always win either way.
+    |
+    | "override_from" sends mail from the active brand's own name and address
+    | instead of the application's. It is off by default, and you should leave
+    | it off until every brand's domain is verified with your mail provider:
+    | sending as a domain whose SPF, DKIM, and DMARC records do not authorise
+    | you is the fastest way to have your mail silently dropped, and it damages
+    | the reputation of the sending domain along the way. With it on, a brand
+    | that names no from address is left alone, and so is mail sent with no
+    | brand active.
+    |
+    */
+
+    'mail' => [
+        'markdown' => true,
+        'override_from' => false,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Brand assets
     |--------------------------------------------------------------------------
     |
