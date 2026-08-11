@@ -47,13 +47,43 @@ Brands come from a driver behind one repository contract. The config driver
 reads them from `config/whitelabel.php`. The database driver stores them in a
 table with a programmatic management API. A Spatie tenant can provide its own
 brand directly. Whichever driver hydrates it, your code always receives the
-same immutable `Brand` object.
+same immutable `Brand` object. Read it with one accessor:
+
+```php
+$brand->name();
+$brand->get('colors.primary');
+$brand->get('settings.support_url');
+```
 
 One brand is active per request, job, or console command. Resolution walks an
 ordered chain and stops at the first answer: explicit runtime override, then
 the current Spatie tenant, then the request domain, then the configured
-default. A brand only overrides what it defines; any key it leaves out falls
-back to the default brand, key by key.
+default.
+
+A brand only overrides what it defines; any key it leaves out falls back to the
+default brand, key by key. Maps such as `colors`, `mail`, and `settings` fall
+back one entry at a time, so naming a single colour keeps the rest of the set.
+Three rules complete the picture:
+
+- **Empty means cleared.** A key set to an empty string, or to an empty list,
+  is deliberately blank and does not fall back. An empty *map*, such as
+  `'colors' => []`, says nothing at all: clear colours one at a time.
+- **Null is an error.** Remove the key to inherit it; the drivers reject an
+  explicit null with a message saying so.
+- **`domain` never falls back.** It decides which brand a request belongs to,
+  so inheriting it would make every brand claim the default brand's host.
+
+Registering a driver of your own is one call, and everything downstream keeps
+working through the contract:
+
+```php
+use Byrcsc\Whitelabel\BrandRepositoryManager;
+
+app(BrandRepositoryManager::class)->extend('redis', fn () => new RedisBrandRepository);
+```
+
+Set `whitelabel.driver` to `redis` to use it. Read-only drivers, config
+included, throw `UnsupportedBrandOperation` from the write methods.
 
 ## Quick start
 

@@ -6,3 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Added
+
+- The immutable `Brand` object, with dot-notation access across the fixed core
+  and the settings bag, and per-key fallback to the default brand.
+- `BrandAsset`, the disk-and-path pair behind a brand's logo and favicon.
+- `BrandDefinition`, the brand schema every driver validates against.
+- The `BrandRepository` contract and the read-only config driver behind it.
+- `BrandRepositoryManager`, for registering a brand driver of your own.
