@@ -128,6 +128,30 @@ final class Brand implements Arrayable
         return BrandAsset::fromDefinition($value);
     }
 
+    public function logoUrl(): ?string
+    {
+        return $this->logo()?->url();
+    }
+
+    public function faviconUrl(): ?string
+    {
+        return $this->favicon()?->url();
+    }
+
+    /**
+     * A URL for any asset the brand carries, named or not.
+     *
+     * `assetUrl('og_image')` reaches `settings.og_image`, and a full dot path
+     * such as `assetUrl('logo')` or `assetUrl('settings.social.card')` works
+     * too. The key is tried as given first, then under the settings bag.
+     */
+    public function assetUrl(string $key): ?string
+    {
+        $asset = $this->asset($key) ?? $this->asset(BrandDefinition::SETTINGS.'.'.$key);
+
+        return $asset?->url();
+    }
+
     /**
      * @return array<string, string>
      */

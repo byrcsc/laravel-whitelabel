@@ -37,3 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `BrandAware` trait, which runs a queued job, mailable, or notification
   with the brand that was active when it was dispatched, and
   `CapturedBrandMissing` for when that brand has since been deleted.
+- Storage-backed asset URLs: `Brand::logoUrl()`, `faviconUrl()`, and
+  `assetUrl()`, with `whitelabel.assets.disk` as the default disk.
+- The `<x-whitelabel::styles />`, `<x-whitelabel::logo />`, and
+  `<x-whitelabel::favicon />` components, and publishable views behind them.
