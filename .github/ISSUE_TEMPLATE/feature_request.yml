@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose a change to the package.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Read the "Out of scope" section of the README first. Some things are
+        deliberately excluded and will be declined no matter how good the
+        implementation is.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that the package makes hard today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API
+      description: Show the code you would like to write.
+      render: php
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you tried instead
+      description: Workarounds, other packages, or why extending the package from your app does not cover it.
+
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Confirmations
+      options:
+        - label: I read the "Out of scope" section and this is not on it.
+          required: true
+        - label: This cannot be solved with a custom driver or a custom resolver.
+          required: true
