@@ -4,9 +4,22 @@ providers:
 
 migrations:
   - workbench/database/migrations
+  # The package's own brands migration, so the demo can run the database
+  # driver without publishing a copy into the workbench.
+  - database/migrations
 
 seeders:
   - Workbench\Database\Seeders\DatabaseSeeder
+
+env:
+  # Only reaches `testbench serve`; the test suite gets its connections from
+  # phpunit.xml.dist. The demo runs against the SQLite file `composer build`
+  # creates, and keeps its cache in memory: the caching decorator reads the
+  # cache on every brand lookup, and the database cache store would want its
+  # own table first. Everything else the demo needs is set in
+  # WorkbenchServiceProvider, which applies to both.
+  - DB_CONNECTION=sqlite
+  - CACHE_STORE=array
 
 workbench:
   start: '/'
@@ -19,7 +32,6 @@ workbench:
     components: true
     views: true
   build:
-    - asset-publish
     - create-sqlite-db
     - db-wipe
     - migrate-refresh

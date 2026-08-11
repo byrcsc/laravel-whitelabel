@@ -9,3 +9,10 @@ parameters:
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
+    excludePaths:
+        analyseAndScan:
+            # Route glue for the demo app. Every complaint here is Larastan
+            # resolving a Blade view name against the application's view paths,
+            # which from inside a package are Testbench's rather than the
+            # workbench's. The classes the routes reach are analysed.
+            - workbench/routes
