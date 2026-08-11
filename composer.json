@@ -55,7 +55,10 @@
         "psr-4": {
             "Byrcsc\\Whitelabel\\": "src/",
             "Byrcsc\\Whitelabel\\Database\\Factories\\": "database/factories/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

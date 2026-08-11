@@ -21,3 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   writes.
 - `BrandAlreadyExists` and `UnknownBrand`, so a collision or a missing brand
   never surfaces as a raw query exception.
+- Lazy runtime resolution through a configurable resolver chain, with the
+  `OverrideResolver`, `TenantResolver`, `DomainResolver`, and `DefaultResolver`
+  shipped in it.
+- The `Whitelabel` facade and the `brand()` helper.
+- `BrandActivated` and `BrandDeactivated`, fired once per lifecycle transition.
+- The optional `EagerResolveBrand` middleware, which resolves at request start
+  and shares the brand with every view.

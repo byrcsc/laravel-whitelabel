@@ -205,22 +205,75 @@ classes you can reorder or extend:
 ],
 ```
 
+Each resolver answers with a brand or with nothing, and the first answer wins.
+`OverrideResolver` answers with whatever you activated. `TenantResolver`
+answers with the current Spatie tenant's brand, and with nothing when Spatie is
+not installed. `DomainResolver` matches the request host, and answers with
+nothing outside an HTTP request rather than matching the placeholder host
+Laravel synthesises for console commands and queue workers. `DefaultResolver`
+answers with `whitelabel.default`, which is why a console command still has a
+brand.
+
+Write your own by implementing `BrandResolver` and adding it to the array:
+
+```php
+use Byrcsc\Whitelabel\Brand;
+use Byrcsc\Whitelabel\Contracts\BrandResolver;
+use Byrcsc\Whitelabel\Facades\Whitelabel;
+
+class HeaderResolver implements BrandResolver
+{
+    public function resolve(): ?Brand
+    {
+        return Whitelabel::find(request()->header('X-Brand', ''));
+    }
+}
+```
+
+Order is the whole mechanism: nothing is special-cased, so moving
+`OverrideResolver` below `DomainResolver` really does make the request host
+beat `Whitelabel::activate()`. Resolvers are constructed one at a time as
+their turn comes, so a resolver the chain never reaches costs nothing.
+
+If you resolve brands by domain, read the trust-boundary note in
+[SECURITY.md](SECURITY.md) about `TrustProxies` first.
+
 Read or set the brand programmatically:
 
 ```php
 use Byrcsc\Whitelabel\Facades\Whitelabel;
 
-Whitelabel::current();          // the active Brand
+Whitelabel::current();          // the active Brand, or null
 Whitelabel::activate('acme');   // explicit override, wins over every resolver
+Whitelabel::forget();           // drop it, and resolve again on next access
+Whitelabel::find('acme');       // look one up without activating it
+Whitelabel::isResolved();       // has the chain run yet?
 ```
 
-An optional `EagerResolveBrand` middleware resolves at request start and
-shares the brand with all views, for applications that want resolution
-failures to surface early.
+`activate()` takes an identifier or a `Brand`. An identifier that names no
+brand throws `UnknownBrand`.
 
-`BrandActivated` and `BrandDeactivated` fire on resolution lifecycle changes.
+An optional `EagerResolveBrand` middleware resolves at request start and
+shares the brand with all views as `$brand`, for applications that want
+resolution failures to surface early:
+
+```php
+Route::middleware(Byrcsc\Whitelabel\Http\Middleware\EagerResolveBrand::class)
+    ->group(base_path('routes/web.php'));
+```
+
+`BrandActivated` and `BrandDeactivated` fire on resolution lifecycle changes,
+once per transition: activating a second brand fires deactivation for the
+first and activation for the second, and activating the brand that is already
+the active one fires nothing. "Nothing active yet" is a real state, so under
+lazy resolution the first `activate()` of a request fires activation alone.
 The database driver additionally fires `BrandCreated`, `BrandUpdated`, and
 `BrandDeleted` from its repository.
+
+The active brand is per request, per job, and per command. The package clears
+it between queued jobs and between Octane requests itself, so a brand never
+survives into the next piece of work. `Whitelabel::flush()` does the same by
+hand, and is what the testing helpers call between tests.
 
 ## Brand assets
 

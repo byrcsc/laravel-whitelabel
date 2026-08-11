@@ -48,6 +48,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Resolver chain
+    |--------------------------------------------------------------------------
+    |
+    | How the active brand is decided, in order. The first resolver to answer
+    | wins. Reorder them, drop the ones you do not need, or add your own class
+    | implementing Byrcsc\Whitelabel\Contracts\BrandResolver.
+    |
+    | The chain runs lazily, the first time the brand is read, so no middleware
+    | is required. Add Byrcsc\Whitelabel\Http\Middleware\EagerResolveBrand to a
+    | route group if you would rather resolve at the start of the request.
+    |
+    */
+
+    'resolvers' => [
+        Byrcsc\Whitelabel\Resolvers\OverrideResolver::class,
+        Byrcsc\Whitelabel\Resolvers\TenantResolver::class,
+        Byrcsc\Whitelabel\Resolvers\DomainResolver::class,
+        Byrcsc\Whitelabel\Resolvers\DefaultResolver::class,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Brands
     |--------------------------------------------------------------------------
     |
