@@ -31,9 +31,15 @@
     ],
     "require": {
         "php": "^8.3",
+        "illuminate/console": "^12.0||^13.0",
         "illuminate/contracts": "^12.0||^13.0",
         "illuminate/database": "^12.0||^13.0",
+        "illuminate/filesystem": "^12.0||^13.0",
+        "illuminate/http": "^12.0||^13.0",
+        "illuminate/mail": "^12.0||^13.0",
+        "illuminate/queue": "^12.0||^13.0",
         "illuminate/support": "^12.0||^13.0",
+        "illuminate/view": "^12.0||^13.0",
         "spatie/laravel-package-tools": "^1.16"
     },
     "require-dev": {
@@ -50,6 +56,7 @@
         "spatie/laravel-multitenancy": "^4.0"
     },
     "suggest": {
+        "phpunit/phpunit": "Required by the InteractsWithBrands testing trait, and already there in any test suite.",
         "spatie/laravel-multitenancy": "Activate a brand whenever a tenant becomes current (^4.0)."
     },
     "autoload": {
