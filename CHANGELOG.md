@@ -28,3 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `BrandActivated` and `BrandDeactivated`, fired once per lifecycle transition.
 - The optional `EagerResolveBrand` middleware, which resolves at request start
   and shares the brand with every view.
+- A caching layer in front of every writable driver: per-brand entries stored
+  forever, a domain index, and invalidation on write.
+- The `whitelabel:clear` command.

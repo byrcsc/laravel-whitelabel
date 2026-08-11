@@ -48,6 +48,31 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Brand cache
+    |--------------------------------------------------------------------------
+    |
+    | Brands are cached per identifier, forever, and busted by the write that
+    | changed them. A null store means the application default. The config
+    | driver is never cached: Laravel's config cache already covers it.
+    |
+    | If you use spatie/laravel-multitenancy with its PrefixCacheTask, that
+    | task changes the cache prefix as tenants switch, which keeps one tenant's
+    | brands out of another's cache automatically. Naming a store here that the
+    | task does not prefix would undo that, so leave it null unless you know
+    | the store is safe to share.
+    |
+    | Clear it by hand with `php artisan whitelabel:clear`.
+    |
+    */
+
+    'cache' => [
+        'enabled' => true,
+        'store' => null,
+        'prefix' => 'whitelabel',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Resolver chain
     |--------------------------------------------------------------------------
     |

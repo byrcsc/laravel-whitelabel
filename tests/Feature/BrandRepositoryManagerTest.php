@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Byrcsc\Whitelabel\Brand;
 use Byrcsc\Whitelabel\BrandRepositoryManager;
 use Byrcsc\Whitelabel\Contracts\BrandRepository;
+use Byrcsc\Whitelabel\Drivers\CachedBrandRepository;
 use Byrcsc\Whitelabel\Drivers\ConfigBrandRepository;
 use Byrcsc\Whitelabel\Tests\Fixtures\ArrayBrandRepository;
 use InvalidArgumentException;
@@ -23,8 +24,21 @@ it('resolves the contract to the driver named in config', function (): void {
 
     $repository = app(BrandRepositoryManager::class)->driver();
 
-    expect($repository)->toBeInstanceOf(ArrayBrandRepository::class)
+    expect($repository)->toBeInstanceOf(CachedBrandRepository::class)
+        ->and(innerRepository($repository))->toBeInstanceOf(ArrayBrandRepository::class)
         ->and($repository->find('acme')?->name())->toBe('Acme');
+});
+
+it('leaves a custom driver unwrapped when caching is switched off', function (): void {
+    config()->set('whitelabel.driver', 'array');
+    config()->set('whitelabel.cache.enabled', false);
+
+    app(BrandRepositoryManager::class)->extend(
+        'array',
+        fn (): BrandRepository => new ArrayBrandRepository,
+    );
+
+    expect(app(BrandRepositoryManager::class)->driver())->toBeInstanceOf(ArrayBrandRepository::class);
 });
 
 it('uses a custom driver fully through the contract', function (): void {

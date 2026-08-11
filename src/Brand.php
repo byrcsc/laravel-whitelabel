@@ -181,6 +181,14 @@ final class Brand implements Arrayable
     }
 
     /**
+     * The default brand this one falls back to, if it has one.
+     */
+    public function fallback(): ?self
+    {
+        return $this->fallback;
+    }
+
+    /**
      * The same brand resolved against a different default brand.
      */
     public function withFallback(?self $fallback): self
