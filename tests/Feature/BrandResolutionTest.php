@@ -339,15 +339,14 @@ describe('runtime definitions', function (): void {
             ->and(whitelabel()->current()?->id())->toBe('default');
     });
 
-    it('forgets the brand after a queued job finishes', function (): void {
+    it('keeps the brand when a job ran synchronously inside the request', function (): void {
         whitelabel()->activate('acme');
 
         $payload = json_encode(['job' => 'ExampleJob', 'data' => []], JSON_THROW_ON_ERROR);
 
         event(new JobProcessed('sync', new SyncJob(app(), $payload, 'sync', 'default')));
 
-        expect(whitelabel()->isResolved())->toBeFalse()
-            ->and(whitelabel()->current()?->id())->toBe('default');
+        expect(whitelabel()->current()?->id())->toBe('acme');
     });
 
     it('forgets the brand before the worker picks up its next job', function (): void {

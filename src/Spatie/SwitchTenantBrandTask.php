@@ -43,6 +43,17 @@ final class SwitchTenantBrandTask implements SwitchTenantTask
             return;
         }
 
+        // Something explicit is already in charge: a brand captured at dispatch
+        // by the BrandAware trait, or a hand-written activate(). The resolver
+        // chain puts the override ahead of the tenant, and so does this. The
+        // check also makes the outcome the same whichever of the two listeners
+        // on JobProcessing runs first.
+        $override = $this->whitelabel->overridden();
+
+        if ($override !== null && $override->id() !== $this->activated) {
+            return;
+        }
+
         $brand = $tenant->brand();
 
         if ($brand === null) {

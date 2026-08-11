@@ -34,3 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The Spatie Multitenancy integration: the `ProvidesBrand` interface,
   `SwitchTenantBrandTask`, and a `TenantResolver` that reads the current tenant
   without naming a Spatie class.
+- The `BrandAware` trait, which runs a queued job, mailable, or notification
+  with the brand that was active when it was dispatched, and
+  `CapturedBrandMissing` for when that brand has since been deleted.

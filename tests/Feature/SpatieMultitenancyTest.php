@@ -7,6 +7,7 @@ use Byrcsc\Whitelabel\Events\BrandActivated;
 use Byrcsc\Whitelabel\Events\BrandDeactivated;
 use Byrcsc\Whitelabel\Resolvers\TenantResolver;
 use Byrcsc\Whitelabel\Spatie\SwitchTenantBrandTask;
+use Byrcsc\Whitelabel\Tests\Fixtures\BrandedJob;
 use Byrcsc\Whitelabel\Tests\Fixtures\BrandIdTenant;
 use Byrcsc\Whitelabel\Tests\Fixtures\ColumnTenant;
 use Byrcsc\Whitelabel\Tests\Fixtures\JsonTenant;
@@ -179,6 +180,31 @@ it('runs a tenant-aware queued job with the tenant brand', function (): void {
 
     expect(Artisan::call('queue:work', ['--once' => true, '--stop-when-empty' => true]))->toBe(0)
         ->and(RecordActiveBrand::$seen)->toBe('Acme');
+});
+
+it('lets the brand captured by BrandAware beat the tenant, activating once', function (): void {
+    config()->set('multitenancy.tenant_model', ColumnTenant::class);
+    config()->set('multitenancy.queues_are_tenant_aware_by_default', true);
+    config()->set('queue.default', 'database');
+    app()->bind(IsTenant::class, ColumnTenant::class);
+
+    ColumnTenant::create(['slug' => 'acme', 'brand_name' => 'Acme'])->makeCurrent();
+
+    // The job is dispatched with a different brand explicitly active.
+    tenantWhitelabel()->activate('stored');
+
+    BrandedJob::$seen = null;
+    dispatch(new BrandedJob);
+
+    Tenant::forgetCurrent();
+    tenantWhitelabel()->flush();
+
+    Event::fake([BrandActivated::class]);
+
+    expect(Artisan::call('queue:work', ['--once' => true, '--stop-when-empty' => true]))->toBe(0)
+        ->and(BrandedJob::$seen)->toBe('stored');
+
+    Event::assertDispatchedTimes(BrandActivated::class, 1);
 });
 
 it('keeps an explicit activation when a tenant is forgotten', function (): void {

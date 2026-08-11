@@ -322,15 +322,49 @@ assets are expected to live on a publicly accessible disk.
 ## Mail and notifications
 
 The active brand is available in every mail view, and the markdown mail theme
-picks up the brand colours and logo. Queued mailables and notifications render
-with the brand that was active when they were dispatched: Spatie tenant-aware
-jobs restore it automatically through the tenant switch task, and the
-`BrandAware` trait covers jobs outside Spatie.
+picks up the brand colours and logo.
 
 Sender override is opt-in. With `whitelabel.mail.override_from` enabled, mail
 sent while a brand is active uses the brand's from name and address. It is off
 by default because sending from a domain you have not verified breaks SPF and
 DMARC; enable it deliberately, per the documentation.
+
+## Queued work
+
+A worker has no request, so it has no domain to resolve a brand from. Add the
+`BrandAware` trait and the job runs with whichever brand was active when it was
+dispatched:
+
+```php
+use Byrcsc\Whitelabel\Queue\BrandAware;
+
+class SendWelcomeEmail implements ShouldQueue
+{
+    use Queueable, BrandAware;
+}
+```
+
+It works the same on a queued mailable, a queued notification, and a queued
+listener. The brand's identifier travels in the queue payload, beside the job
+rather than inside it, so nothing changes about how your job serialises.
+
+Three rules finish the picture:
+
+- **No brand at dispatch, no brand restored.** The job resolves normally, which
+  in a worker means the configured default.
+- **A brand that has since been deleted fails the job**, with
+  `CapturedBrandMissing`, rather than quietly sending mail that looks like
+  somebody else. At the default single try that means `failed_jobs`; give the
+  job more tries if you would rather it waited for the brand to come back.
+- **With Spatie, you rarely need the trait.** A tenant-aware job restores its
+  tenant, and the switch task activates that tenant's brand. Where both apply,
+  the captured brand wins. Note Spatie's own
+  `queues_are_tenant_aware_by_default`: while that is on, a job dispatched with
+  no current tenant is discarded before it runs, whatever this package does.
+
+Console commands are the same story without the trait: no override, so
+`whitelabel.default` decides. `Whitelabel::activate()` at the top of a command
+is the way to say otherwise.
 
 ## Spatie Multitenancy
 
