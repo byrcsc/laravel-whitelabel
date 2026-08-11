@@ -123,6 +123,73 @@ Use it in a layout:
 (`--brand-primary`, `--brand-secondary`), ready for your own CSS or Tailwind
 utilities to consume.
 
+## Choosing a driver
+
+The **config driver** is the default. Brands live in `config/whitelabel.php`,
+they are version-controlled and reviewable, Laravel's config cache already
+makes them free to read, and there is no table and no migration. It is
+read-only: the write methods throw. Reach for it when brands change at the
+speed of deploys.
+
+The **database driver** stores brands in a table and gives you a programmatic
+management API. Reach for it when brands are created by people rather than by
+pull requests: a signup flow, an admin screen, a tenant provisioning job.
+
+Switch with one config key, after publishing the migration:
+
+```php
+'driver' => 'database',
+```
+
+```bash
+php artisan vendor:publish --tag=whitelabel-migrations
+php artisan migrate
+```
+
+The table name and connection are configurable under `whitelabel.database`.
+Set them before you publish, since the migration reads them too.
+
+## Managing brands
+
+Both drivers sit behind the same contract, so this is how you read brands
+whichever one you use:
+
+```php
+use Byrcsc\Whitelabel\Contracts\BrandRepository;
+
+$brands = app(BrandRepository::class);
+
+$brands->all();                          // array<string, Brand>
+$brands->find('acme');                   // ?Brand
+$brands->findByDomain('app.acme.com');   // ?Brand
+$brands->has('acme');                    // bool
+```
+
+The database driver adds the writes:
+
+```php
+$brands->create('acme', [
+    'name' => 'Acme',
+    'domain' => 'app.acme.com',
+    'colors' => ['primary' => '#7c3aed'],
+]);
+
+$brands->update('acme', ['name' => 'Acme Inc']);   // replaces the definition
+$brands->delete('acme');                            // bool
+```
+
+`update()` replaces the whole definition rather than patching it, so a key you
+leave out goes back to inheriting from the default brand. Both writes validate
+their definition exactly as the config driver does, `null` rejection included.
+
+Failures are typed, never raw query exceptions: `BrandAlreadyExists` for a
+duplicate identifier or a domain that belongs to another brand, `UnknownBrand`
+for updating a brand that is not there, and `InvalidBrandDefinition` for a
+definition the schema rejects. All of them implement `WhitelabelException`.
+
+Writes fire `BrandCreated`, `BrandUpdated`, and `BrandDeleted`, each carrying
+the affected `Brand`.
+
 ## Resolving the active brand
 
 Resolution is lazy: the chain runs the first time the brand is accessed, so

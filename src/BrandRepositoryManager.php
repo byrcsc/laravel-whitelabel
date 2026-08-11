@@ -6,6 +6,8 @@ namespace Byrcsc\Whitelabel;
 
 use Byrcsc\Whitelabel\Contracts\BrandRepository;
 use Byrcsc\Whitelabel\Drivers\ConfigBrandRepository;
+use Byrcsc\Whitelabel\Drivers\DatabaseBrandRepository;
+use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Support\Manager;
 
 /**
@@ -31,5 +33,10 @@ class BrandRepositoryManager extends Manager
     protected function createConfigDriver(): BrandRepository
     {
         return new ConfigBrandRepository($this->config);
+    }
+
+    protected function createDatabaseDriver(): BrandRepository
+    {
+        return new DatabaseBrandRepository($this->config, $this->container->make(Dispatcher::class));
     }
 }

@@ -20,6 +20,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Database driver
+    |--------------------------------------------------------------------------
+    |
+    | Where the "database" driver keeps its brands. A null connection means the
+    | application default. Change the table name before you publish the
+    | migration; the model reads it from here.
+    |
+    */
+
+    'database' => [
+        'connection' => null,
+        'table' => 'brands',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default brand
     |--------------------------------------------------------------------------
     |
