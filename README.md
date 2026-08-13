@@ -591,6 +591,69 @@ The package will never include:
 - Per-brand Blade template directories.
 - Tenancy, user management, billing, or database isolation.
 
+## The public API
+
+Everything below is covered by semantic versioning and pinned by
+`tests/Feature/PublicApiTest.php`. Anything not here is internal and can change
+in a patch release.
+
+**`Byrcsc\Whitelabel\Brand`** — the brand itself.
+
+```php
+$brand->id();               $brand->name();             $brand->domain();
+$brand->get($key, $default) $brand->has($key);
+$brand->colors();           $brand->color($name, $default);
+$brand->settings();         $brand->setting($key, $default);
+$brand->logo();             $brand->favicon();          $brand->asset($key);
+$brand->logoUrl();          $brand->faviconUrl();       $brand->assetUrl($key);
+$brand->mailFromName();     $brand->mailFromAddress();
+$brand->definition();       $brand->fallback();         $brand->withFallback($other);
+$brand->toArray();
+```
+
+**`Byrcsc\Whitelabel\BrandAsset`** — `fromDefinition()`, `isAbsoluteUrl()`,
+`url()`, `toArray()`, and the readonly `path` and `disk`.
+
+**`Byrcsc\Whitelabel\BrandDefinition`** — the schema a custom driver validates
+against: `validate()`, `inherit()`, and the key constants.
+
+**`Byrcsc\Whitelabel\Whitelabel`**, and the `Facades\Whitelabel` in front of it
+— `current()`, `isResolved()`, `activate()`, `forget()`, `flush()`,
+`define()`, `find()`, `findByDomain()`, `overridden()`. Plus the global
+`brand()` helper.
+
+**Contracts** — `BrandRepository` (`all`, `find`, `findByDomain`, `has`,
+`create`, `update`, `delete`, `flush`), `BrandResolver` (`resolve`),
+`ProvidesBrand` (`brand`).
+
+**Drivers** — `ConfigBrandRepository`, `DatabaseBrandRepository`,
+`CachedBrandRepository` (plus `inner()`), and `BrandRepositoryManager`
+(`driver()`, `extend()`, `getDefaultDriver()`).
+
+**Resolvers** — `OverrideResolver`, `TenantResolver`, `DomainResolver`,
+`DefaultResolver`.
+
+**Events** — `BrandActivated`, `BrandDeactivated`, `BrandCreated`,
+`BrandUpdated`, `BrandDeleted`. Each has a readonly `$brand`.
+
+**Exceptions**, all implementing `WhitelabelException` —
+`InvalidBrandDefinition`, `UnknownBrand`, `UnsupportedBrandOperation`,
+`BrandAlreadyExists`, `CapturedBrandMissing`.
+
+**The rest** — `Queue\BrandAware`, `Http\Middleware\EagerResolveBrand`,
+`Spatie\SwitchTenantBrandTask`, `Mail\BrandedMarkdown` (what a published mail
+view calls), `Testing\InteractsWithBrands` (`actingWithBrand`, `defineBrand`),
+the three `View\Components`, and `Models\BrandRecord::factory()` with its
+`identifiedBy()` and `bare()` states.
+
+**Commands** — `whitelabel:install` (`--database`, `--force`) and
+`whitelabel:clear`. **Publish tags** — `whitelabel-config`,
+`whitelabel-views`, `whitelabel-migrations`. **Config keys** — everything in
+`config/whitelabel.php`.
+
+`Models\BrandRecord` is the one internal class named here, and only for its
+factory: nothing the package returns is ever a `BrandRecord`.
+
 ## Versioning
 
 The package follows [semantic versioning](https://semver.org/spec/v2.0.0.html).

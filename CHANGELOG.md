@@ -48,3 +48,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The `InteractsWithBrands` testing trait, with `actingWithBrand()` and
   `defineBrand()`.
 - The `whitelabel:install` command.
+- A `workbench/` demo application exercising every integration seam, and a
+  public API surface test that freezes what the README documents.
