@@ -15,3 +15,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `BrandDefinition`, the brand schema every driver validates against.
 - The `BrandRepository` contract and the read-only config driver behind it.
 - `BrandRepositoryManager`, for registering a brand driver of your own.
+- The database driver: a publishable `brands` migration and full CRUD through
+  the repository contract.
+- `BrandCreated`, `BrandUpdated`, and `BrandDeleted`, fired by repository
+  writes.
+- `BrandAlreadyExists` and `UnknownBrand`, so a collision or a missing brand
+  never surfaces as a raw query exception.

@@ -15,7 +15,8 @@ class WhitelabelServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('whitelabel')
-            ->hasConfigFile();
+            ->hasConfigFile()
+            ->hasMigration('create_whitelabel_brands_table');
     }
 
     public function packageRegistered(): void
