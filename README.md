@@ -33,8 +33,16 @@ composer require byrcsc/laravel-whitelabel
 php artisan whitelabel:install
 ```
 
-The install command publishes `config/whitelabel.php` and, if you opt into the
-database driver, the migrations.
+The install command publishes `config/whitelabel.php` and asks whether you want
+the brands migration too. Run it again any time: it leaves files it has already
+published alone, unless you pass `--force`. To script it, say up front which
+you want:
+
+```bash
+php artisan whitelabel:install --database --no-interaction
+```
+
+Those two, plus `whitelabel:clear`, are the entire artisan surface.
 
 ## What a brand is
 
@@ -525,17 +533,49 @@ and you can change it.
 
 ## Testing helpers
 
+Add the trait to your test case and give a test a brand:
+
 ```php
 use Byrcsc\Whitelabel\Testing\InteractsWithBrands;
 
 $this->actingWithBrand(['name' => 'Acme', 'colors' => ['primary' => '#000']]);
+$this->actingWithBrand('acme');                     // one the driver knows
+$this->defineBrand('spare', ['name' => 'Spare']);   // without activating it
+```
 
+No database, no configuration, and whichever driver the application uses. A
+brand defined this way still falls back to the default brand for anything it
+leaves out, and everything is dropped at the end of each test.
+
+The same two calls are available outside a test:
+
+```php
 Whitelabel::define('acme', [...]);   // register a Brand from an array, no DB
 Whitelabel::activate('acme');
 ```
 
-The database driver ships a model factory. Events are plain Laravel events,
-so `Event::fake()` covers assertions.
+The database driver ships a model factory for integration tests that do want
+rows:
+
+```php
+use Byrcsc\Whitelabel\Models\BrandRecord;
+
+BrandRecord::factory()->identifiedBy('acme')->create(['name' => 'Acme']);
+BrandRecord::factory()->bare()->create();   // a brand that defines nothing
+```
+
+`BrandRecord` is the one internal class the package asks you to name, and only
+here. Everything the package hands back is a `Brand`.
+
+Events are plain Laravel events, so `Event::fake()` covers assertions:
+
+```php
+Event::fake([BrandCreated::class]);
+
+app(BrandRepository::class)->create('acme', ['name' => 'Acme']);
+
+Event::assertDispatched(BrandCreated::class);
+```
 
 ## Out of scope
 

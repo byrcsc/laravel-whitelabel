@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Byrcsc\Whitelabel;
 
 use Byrcsc\Whitelabel\Commands\ClearBrandCacheCommand;
+use Byrcsc\Whitelabel\Commands\InstallCommand;
 use Byrcsc\Whitelabel\Contracts\BrandRepository;
 use Byrcsc\Whitelabel\Mail\BrandedMailViews;
 use Byrcsc\Whitelabel\Mail\OverrideMailSender;
@@ -53,7 +54,7 @@ class WhitelabelServiceProvider extends PackageServiceProvider
             ->hasConfigFile()
             ->hasViews()
             ->hasMigration('create_whitelabel_brands_table')
-            ->hasCommand(ClearBrandCacheCommand::class);
+            ->hasCommands(InstallCommand::class, ClearBrandCacheCommand::class);
     }
 
     public function packageRegistered(): void

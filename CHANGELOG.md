@@ -45,3 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   on the primary button, behind `whitelabel.mail.markdown`.
 - The opt-in `whitelabel.mail.override_from`, which sends mail from the active
   brand's own name and address.
+- The `InteractsWithBrands` testing trait, with `actingWithBrand()` and
+  `defineBrand()`.
+- The `whitelabel:install` command.
