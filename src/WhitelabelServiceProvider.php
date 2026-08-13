@@ -6,8 +6,11 @@ namespace Byrcsc\Whitelabel;
 
 use Byrcsc\Whitelabel\Commands\ClearBrandCacheCommand;
 use Byrcsc\Whitelabel\Contracts\BrandRepository;
+use Byrcsc\Whitelabel\Queue\BrandContext;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Queue\Events\JobProcessing;
+use Illuminate\Queue\Jobs\SyncJob;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -64,6 +67,23 @@ class WhitelabelServiceProvider extends PackageServiceProvider
     public function packageBooted(): void
     {
         $this->forgetBrandBetweenUnitsOfWork();
+        $this->carryBrandIntoQueuedWork();
+    }
+
+    /**
+     * Stamp outgoing jobs with the active brand, and give it back to the jobs
+     * that asked for it with the `BrandAware` trait.
+     */
+    private function carryBrandIntoQueuedWork(): void
+    {
+        $context = new BrandContext($this->app);
+
+        $context->capture();
+
+        $this->app->make(Dispatcher::class)->listen(
+            JobProcessing::class,
+            static fn (JobProcessing $event) => $context->restore($event),
+        );
     }
 
     /**
@@ -80,7 +100,14 @@ class WhitelabelServiceProvider extends PackageServiceProvider
     {
         $app = $this->app;
 
-        $app->make(Dispatcher::class)->listen(self::RESET_EVENTS, static function () use ($app): void {
+        $app->make(Dispatcher::class)->listen(self::RESET_EVENTS, static function (object $event) use ($app): void {
+            // A sync job runs inside whatever dispatched it, so its completion
+            // is not the end of a unit of work: clearing here would take the
+            // brand out from under the request that is still running.
+            if (property_exists($event, 'job') && $event->job instanceof SyncJob) {
+                return;
+            }
+
             if ($app->resolved(Whitelabel::class)) {
                 $app->make(Whitelabel::class)->flush();
             }
