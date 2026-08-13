@@ -221,6 +221,8 @@ it('honours a configured key prefix', function (): void {
 });
 
 it('follows a Spatie-style cache prefix switch', function (): void {
+    config()->set('cache.default', 'database');
+
     $switchTenant = function (string $prefix): void {
         // What PrefixCacheTask does when a tenant becomes current: it rewrites
         // the prefix and forgets the driver on the same manager.
