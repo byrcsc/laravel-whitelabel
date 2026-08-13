@@ -41,3 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `assetUrl()`, with `whitelabel.assets.disk` as the default disk.
 - The `<x-whitelabel::styles />`, `<x-whitelabel::logo />`, and
   `<x-whitelabel::favicon />` components, and publishable views behind them.
+- Branded markdown mail: the brand's logo in the header and its primary colour
+  on the primary button, behind `whitelabel.mail.markdown`.
+- The opt-in `whitelabel.mail.override_from`, which sends mail from the active
+  brand's own name and address.

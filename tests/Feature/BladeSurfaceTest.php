@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 use Byrcsc\Whitelabel\Brand;
 use Byrcsc\Whitelabel\Whitelabel;
+use Byrcsc\Whitelabel\WhitelabelServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 beforeEach(function (): void {
     Storage::fake('public');
@@ -239,17 +242,28 @@ it('renders nothing at all when no brand resolves', function (): void {
         ->toBe('');
 });
 
+it('publishes its views into the application vendor directory', function (): void {
+    $paths = ServiceProvider::pathsToPublish(WhitelabelServiceProvider::class, 'whitelabel-views');
+
+    expect(array_values($paths))->toBe([resource_path('views/vendor/whitelabel')]);
+});
+
 it('lets a published view override the shipped one', function (): void {
-    activate('acme');
+    $vendor = resource_path('views/vendor/whitelabel');
 
-    $published = resource_path('views/vendor/whitelabel/components/logo.blade.php');
+    File::ensureDirectoryExists($vendor.'/components');
+    File::put($vendor.'/components/logo.blade.php', '<span>published logo</span>');
 
-    File::ensureDirectoryExists(dirname($published));
-    File::put($published, '<span>published logo</span>');
+    // Laravel only adds the vendor directory to a package's view namespace if
+    // it exists when the package boots, so this is the state a real publish
+    // leaves behind for the next boot.
+    View::prependNamespace('whitelabel', $vendor);
 
     try {
+        activate('acme');
+
         expect(Blade::render('<x-whitelabel::logo />'))->toContain('published logo');
     } finally {
-        File::deleteDirectory(resource_path('views/vendor/whitelabel'));
+        File::deleteDirectory($vendor);
     }
 });

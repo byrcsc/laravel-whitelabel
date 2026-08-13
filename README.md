@@ -365,13 +365,46 @@ php artisan vendor:publish --tag=whitelabel-views
 
 ## Mail and notifications
 
-The active brand is available in every mail view, and the markdown mail theme
-picks up the brand colours and logo.
+The active brand is available in every mail and notification mail view, through
+the same `brand()` helper and `Whitelabel` facade as your web views.
 
-Sender override is opt-in. With `whitelabel.mail.override_from` enabled, mail
-sent while a brand is active uses the brand's from name and address. It is off
-by default because sending from a domain you have not verified breaks SPF and
-DMARC; enable it deliberately, per the documentation.
+Laravel's markdown mail is branded out of the box: the header shows the brand's
+logo instead of the application name, and the primary button is painted in the
+brand's primary colour. A brand with neither gets exactly what Laravel renders
+today. Turn the whole thing off with `whitelabel.mail.markdown => false`.
+
+To change the markup rather than switch it off, start from the package's
+copies:
+
+```bash
+php artisan vendor:publish --tag=whitelabel-views
+```
+
+That writes them to `resources/views/vendor/whitelabel/mail/html`. Copy the
+ones you want into `resources/views/vendor/mail/html`, which is where Laravel
+looks first and therefore wins over both the package and Laravel itself. Keep
+the `Byrcsc\Whitelabel\Mail\BrandedMarkdown` calls if you want the branding —
+publishing Laravel's own views with `--tag=laravel-mail` instead gives you
+unbranded markup, which is a fine choice as long as it is the one you meant.
+
+### Sending as the brand
+
+Sender override is opt-in:
+
+```php
+'mail' => ['override_from' => true],
+```
+
+With it on, mail sent while a brand is active goes out from that brand's
+`from_name` and `from_address`. Mail sent with no brand active, or from a brand
+that names no sender, is left alone.
+
+**It is off by default for a reason.** Sending from a domain whose SPF, DKIM,
+and DMARC records do not authorise your mail provider is how mail stops being
+delivered — silently, to spam, and with damage to the sending domain's
+reputation that outlasts the mistake. Verify each brand's domain with your
+provider first, then turn it on. The flag overrides the sender on every message
+while it is enabled, including mailables that set their own `from()`.
 
 ## Queued work
 
