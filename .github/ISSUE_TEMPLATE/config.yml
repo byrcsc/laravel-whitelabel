@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Question or idea
+    url: https://github.com/byrcsc/laravel-whitelabel/discussions
+    about: Usage questions and feature ideas both live in discussions.
+  - name: Security vulnerability
+    url: https://github.com/byrcsc/laravel-whitelabel/security/advisories/new
+    about: Please report security problems privately, never as a public issue.

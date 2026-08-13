@@ -1,0 +1,69 @@
+name: Bug report
+description: Report a reproducible bug.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A failing test is the fastest way to a fix. A short reproduction is the
+        next best thing.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: How to reproduce
+      description: A failing test, a code snippet, or numbered steps.
+      render: php
+    validations:
+      required: true
+
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      placeholder: 1.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: laravel-version
+    attributes:
+      label: Laravel version
+      placeholder: 12.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: php-version
+    attributes:
+      label: PHP version
+      placeholder: "8.3"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: driver
+    attributes:
+      label: Brand driver
+      options:
+        - config
+        - database
+        - custom
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: multitenancy
+    attributes:
+      label: Environment
+      options:
+        - label: spatie/laravel-multitenancy is installed
+        - label: The problem only happens in a queue worker
