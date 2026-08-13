@@ -79,13 +79,15 @@ final class DatabaseBrandRepository implements BrandRepository
     {
         $columns = BrandColumns::fromDefinition(BrandDefinition::validate($id, $definition));
 
-        $record = $this->write($id, $columns, static function () use ($id, $columns): BrandRecord {
-            $record = new BrandRecord;
-            $record->identifier = $id;
-            $record->forceFill($columns)->save();
+        $record = $this->write($id, $columns, fn (): BrandRecord => $this->transaction(
+            static function () use ($id, $columns): BrandRecord {
+                $record = new BrandRecord;
+                $record->identifier = $id;
+                $record->forceFill($columns)->save();
 
-            return $record;
-        });
+                return $record;
+            }
+        ));
 
         $brand = $this->hydrate($record);
 
@@ -162,7 +164,7 @@ final class DatabaseBrandRepository implements BrandRepository
         } catch (UniqueConstraintViolationException $exception) {
             $domain = $columns[BrandDefinition::DOMAIN] ?? null;
 
-            if (is_string($domain) && $this->domainTaken($domain, $id)) {
+            if (is_string($domain) && $this->domainCollided($exception)) {
                 throw BrandAlreadyExists::onDomain($domain, $id, $exception);
             }
 
@@ -170,12 +172,12 @@ final class DatabaseBrandRepository implements BrandRepository
         }
     }
 
-    private function domainTaken(string $domain, string $exceptFor): bool
+    private function domainCollided(UniqueConstraintViolationException $exception): bool
     {
-        return BrandRecord::query()
-            ->where('domain', $domain)
-            ->where('identifier', '!=', $exceptFor)
-            ->exists();
+        $driverMessage = $exception->errorInfo[2] ?? null;
+
+        return is_string($driverMessage)
+            && str_contains($driverMessage, BrandDefinition::DOMAIN);
     }
 
     /**
