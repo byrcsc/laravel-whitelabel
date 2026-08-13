@@ -35,9 +35,17 @@ developer and never by an end user:
 - Colour values rendered by `<x-whitelabel::styles />`.
 - Resolver class-strings listed in `whitelabel.resolvers`.
 
-Brand values reach `<style>` blocks, `img` tags, and mail headers. If your
-application lets untrusted users write brand records, validate those values
-before they are stored. The package will not do it for you.
+Brand values reach `<style>` blocks, `img` and `link` tags, and mail headers.
+If your application lets untrusted users write brand records, validate those
+values before they are stored. The package will not do it for you.
+
+One exception, as defence in depth rather than a change of contract:
+`<x-whitelabel::styles />` writes colours into a `<style>` element, which the
+browser treats as CSS raw text and never HTML-decodes, so Blade's escaping
+cannot protect it. Colour names that are not plain identifiers are dropped, and
+the characters that would end the declaration, close the block, or open a
+comment are stripped from values. Colours are still trusted input; this only
+means a mistake there cannot become a script tag.
 
 The package treats the following as untrusted:
 

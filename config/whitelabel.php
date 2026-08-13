@@ -48,6 +48,37 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Brand assets
+    |--------------------------------------------------------------------------
+    |
+    | The Storage disk a brand's logo, favicon, and other assets live on when
+    | their definition does not name one. Assets are expected to be publicly
+    | readable: the package builds URLs and never checks that a file exists or
+    | that a disk is public.
+    |
+    */
+
+    'assets' => [
+        'disk' => 'public',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | CSS custom properties
+    |--------------------------------------------------------------------------
+    |
+    | The prefix <x-whitelabel::styles /> puts on the brand's colours, so a
+    | colour named "primary" is emitted as --brand-primary. Override it per
+    | usage with <x-whitelabel::styles prefix="theme" />.
+    |
+    */
+
+    'css' => [
+        'prefix' => 'brand',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Brand cache
     |--------------------------------------------------------------------------
     |

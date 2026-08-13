@@ -11,6 +11,7 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Queue\Events\JobProcessing;
 use Illuminate\Queue\Jobs\SyncJob;
+use Illuminate\Support\Facades\Blade;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
@@ -45,6 +46,7 @@ class WhitelabelServiceProvider extends PackageServiceProvider
         $package
             ->name('whitelabel')
             ->hasConfigFile()
+            ->hasViews()
             ->hasMigration('create_whitelabel_brands_table')
             ->hasCommand(ClearBrandCacheCommand::class);
     }
@@ -66,6 +68,11 @@ class WhitelabelServiceProvider extends PackageServiceProvider
 
     public function packageBooted(): void
     {
+        // Registered as a namespace rather than one component at a time, so
+        // the tags read <x-whitelabel::logo /> and a published view under
+        // resources/views/vendor/whitelabel overrides the shipped one.
+        Blade::componentNamespace('Byrcsc\\Whitelabel\\View\\Components', 'whitelabel');
+
         $this->forgetBrandBetweenUnitsOfWork();
         $this->carryBrandIntoQueuedWork();
     }

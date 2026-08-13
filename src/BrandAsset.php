@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Byrcsc\Whitelabel;
 
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
+
 /**
  * A brand asset: either a path on a Laravel Storage disk, or an absolute URL.
  *
@@ -49,6 +52,31 @@ final readonly class BrandAsset
     public function isAbsoluteUrl(): bool
     {
         return (bool) preg_match('#^(?:[a-z][a-z0-9+.-]*:|//)#i', $this->path);
+    }
+
+    /**
+     * A URL for this asset.
+     *
+     * An absolute URL passes through untouched. Anything else goes through
+     * `Storage::disk(...)->url(...)`, on this asset's disk or the one named by
+     * `whitelabel.assets.disk`. Nothing here checks that the file exists or
+     * that the disk is public: that is the application's business, and the
+     * check would cost a round trip on every page.
+     */
+    public function url(): string
+    {
+        if ($this->isAbsoluteUrl()) {
+            return $this->path;
+        }
+
+        return Storage::disk($this->disk ?? self::defaultDisk())->url($this->path);
+    }
+
+    private static function defaultDisk(): ?string
+    {
+        $disk = Config::get('whitelabel.assets.disk');
+
+        return is_string($disk) && $disk !== '' ? $disk : null;
     }
 
     /**

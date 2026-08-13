@@ -315,9 +315,53 @@ brand()->faviconUrl();
 brand()->assetUrl('og_image');   // any asset stored in the settings bag
 ```
 
-Absolute URLs pass through untouched. The package generates URLs and nothing
-more: it never checks that a file exists or that a disk is public. Brand
-assets are expected to live on a publicly accessible disk.
+An asset can also be written as a plain string: a path on the default disk, or
+an absolute URL, which passes through untouched. The default disk is
+`whitelabel.assets.disk`.
+
+The package generates URLs and nothing more: it never checks that a file exists
+or that a disk is public. Brand assets are expected to live on a publicly
+accessible disk.
+
+## Blade components
+
+Three components, all of which render nothing at all when the brand has no such
+value after fallback:
+
+```blade
+<x-whitelabel::styles />
+<x-whitelabel::logo class="h-8" alt="Home" />
+<x-whitelabel::favicon />
+```
+
+`styles` emits the colour set as CSS custom properties in a `<style>` block:
+
+```html
+<style>:root{--brand-primary:#7c3aed;--brand-secondary:#0ea5e9;}</style>
+```
+
+The `brand` prefix comes from `whitelabel.css.prefix`, and
+`<x-whitelabel::styles prefix="theme" />` overrides it for one usage. Consume
+them wherever you would use any custom property:
+
+```css
+.button { background: var(--brand-primary); }
+```
+
+```js
+// tailwind.config.js
+theme: { extend: { colors: { brand: 'var(--brand-primary)' } } }
+```
+
+`logo` renders an `img` whose `alt` defaults to the brand's name, and `favicon`
+renders a `link rel="icon"` whose `type` is guessed from the file extension.
+Both forward any attributes you give them.
+
+To change the markup, publish the views and edit them:
+
+```bash
+php artisan vendor:publish --tag=whitelabel-views
+```
 
 ## Mail and notifications
 
