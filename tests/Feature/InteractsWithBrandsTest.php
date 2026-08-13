@@ -10,7 +10,7 @@ use Byrcsc\Whitelabel\Facades\Whitelabel;
 use Byrcsc\Whitelabel\Models\BrandRecord;
 use Byrcsc\Whitelabel\Testing\InteractsWithBrands;
 use Byrcsc\Whitelabel\Tests\TestCase;
-use Illuminate\Foundation\Testing\RefreshDatabaseState;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -37,15 +37,21 @@ class InteractsWithBrandsTest extends TestCase
     #[Test]
     public function it_defines_and_activates_a_brand_with_no_database_in_sight(): void
     {
+        DB::connection()->flushQueryLog();
+        DB::connection()->enableQueryLog();
+
         $brand = $this->actingWithBrand(['name' => 'Acme', 'colors' => ['primary' => '#7c3aed']]);
 
         $this->assertSame('testing', $brand->id());
         $this->assertSame('Acme', brand('name'));
         $this->assertSame('#7c3aed', brand('colors.primary'));
 
-        // Not "no rows": no database at all. Counting rows would itself
-        // trigger the migration this is claiming not to need.
-        $this->assertFalse(RefreshDatabaseState::$migrated);
+        $queries = DB::connection()->getQueryLog();
+
+        DB::connection()->disableQueryLog();
+
+        // Not "no rows": no database at all.
+        $this->assertSame([], $queries);
     }
 
     #[Test]
