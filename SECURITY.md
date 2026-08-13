@@ -44,6 +44,24 @@ The package treats the following as untrusted:
 - The request host used by `DomainResolver`, which is matched against known
   brand domains and never used to build a brand.
 
+### The request host decides which brand a visitor sees
+
+`DomainResolver` reads the host through `Request::getHost()`, which is the
+correct Laravel API and which therefore honours your `TrustProxies`
+configuration. That is worth saying out loud: if your application trusts all
+proxies, `X-Forwarded-Host` is attacker-controlled, and an attacker can pick
+which brand they are served by setting a header.
+
+This is not specific to this package — the same header decides your session
+domain and your generated URLs — but brand selection makes it visible. If you
+resolve brands by domain, configure `TrustProxies` with the proxies you
+actually run behind, and set `trustedHosts` to the domains you actually serve.
+
+Getting a brand you are not "entitled" to is not itself a privilege
+escalation: the package decides how the application looks, never who the user
+is or what they may do. Report it if you find a path where brand selection
+reaches further than appearance.
+
 Anything that lets untrusted input escape one of the trusted paths above, or
 that lets one brand's data leak into another brand's request, job, or mail, is
 a vulnerability. Report it.
