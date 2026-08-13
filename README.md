@@ -53,6 +53,7 @@ same immutable `Brand` object. Read it with one accessor:
 $brand->name();
 $brand->get('colors.primary');
 $brand->get('settings.support_url');
+$brand->fallback();              // the default brand behind it, if any
 ```
 
 One brand is active per request, job, or console command. Resolution walks an
@@ -189,6 +190,35 @@ definition the schema rejects. All of them implement `WhitelabelException`.
 
 Writes fire `BrandCreated`, `BrandUpdated`, and `BrandDeleted`, each carrying
 the affected `Brand`.
+
+## Caching
+
+The database driver is wrapped in a cache, so a brand is read from the
+database once and served from the cache after that. Entries are per brand,
+keyed by identifier, and stored forever: a brand changes when someone changes
+it, not when a clock runs out. A separate domain index answers `findByDomain`.
+
+The index grows one domain at a time as hosts are looked up, so a cold lookup
+costs the driver's own indexed query rather than a listing of every brand.
+
+Every write busts the brand it touched and the domain index. That is the only
+invalidation path, which means the next read after an update, a delete, or a
+domain move is already fresh — there is no window to wait out.
+
+The escape hatch, for a definition changed outside the package:
+
+```bash
+php artisan whitelabel:clear
+```
+
+It forgets every key the package owns and nothing else; your application's own
+cache entries survive.
+
+The store, the key prefix, and caching itself are configurable under
+`whitelabel.cache`. The config driver is never cached — Laravel's config cache
+already covers it. If you use `spatie/laravel-multitenancy` with its
+`PrefixCacheTask`, leave `store` null so brands land in the prefixed store the
+task sets up, and one tenant's brands stay out of another tenant's cache.
 
 ## Resolving the active brand
 

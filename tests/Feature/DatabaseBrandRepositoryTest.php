@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Byrcsc\Whitelabel\BrandAsset;
 use Byrcsc\Whitelabel\Contracts\BrandRepository;
+use Byrcsc\Whitelabel\Drivers\CachedBrandRepository;
 use Byrcsc\Whitelabel\Drivers\DatabaseBrandRepository;
 use Byrcsc\Whitelabel\Events\BrandCreated;
 use Byrcsc\Whitelabel\Events\BrandDeleted;
@@ -34,8 +35,11 @@ $acme = [
     'settings' => ['support_url' => 'https://support.acme.com', 'seats' => 10],
 ];
 
-it('resolves the database driver from config', function (): void {
-    expect(app(BrandRepository::class))->toBeInstanceOf(DatabaseBrandRepository::class);
+it('resolves the database driver from config, behind the cache', function (): void {
+    $repository = app(BrandRepository::class);
+
+    expect($repository)->toBeInstanceOf(CachedBrandRepository::class)
+        ->and(innerRepository($repository))->toBeInstanceOf(DatabaseBrandRepository::class);
 });
 
 it('round-trips a brand through find', function () use ($acme): void {

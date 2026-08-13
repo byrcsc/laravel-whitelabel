@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Byrcsc\Whitelabel;
 
+use Byrcsc\Whitelabel\Commands\ClearBrandCacheCommand;
 use Byrcsc\Whitelabel\Contracts\BrandRepository;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
@@ -36,7 +37,8 @@ class WhitelabelServiceProvider extends PackageServiceProvider
         $package
             ->name('whitelabel')
             ->hasConfigFile()
-            ->hasMigration('create_whitelabel_brands_table');
+            ->hasMigration('create_whitelabel_brands_table')
+            ->hasCommand(ClearBrandCacheCommand::class);
     }
 
     public function packageRegistered(): void
