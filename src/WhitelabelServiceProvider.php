@@ -17,19 +17,24 @@ class WhitelabelServiceProvider extends PackageServiceProvider
      * Points at which the active brand must not survive into the next piece
      * of work.
      *
+     * Every one of these fires *after* a unit of work, or before one has begun
+     * to set itself up. Nothing here fires at the start of a job, because
+     * Spatie's tenant switch also hooks `JobProcessing` and there is no
+     * ordering between two listeners on the same event: resetting there would
+     * be a coin flip on whether the tenant's brand survived to the job body.
+     *
      * The Octane events are listened for by name: the class does not exist
      * unless Octane is installed, and an event that never fires costs nothing.
      *
      * @var list<string>
      */
     private const RESET_EVENTS = [
-        'Illuminate\Queue\Events\JobProcessing',
+        'Illuminate\Queue\Events\Looping',
         'Illuminate\Queue\Events\JobProcessed',
         'Illuminate\Queue\Events\JobFailed',
-        'Laravel\Octane\Events\RequestReceived',
         'Laravel\Octane\Events\RequestTerminated',
-        'Laravel\Octane\Events\TaskReceived',
-        'Laravel\Octane\Events\TickReceived',
+        'Laravel\Octane\Events\TaskTerminated',
+        'Laravel\Octane\Events\TickTerminated',
     ];
 
     public function configurePackage(Package $package): void
@@ -66,6 +71,10 @@ class WhitelabelServiceProvider extends PackageServiceProvider
      * the request or job that resolved a brand. Without this, the next unit of
      * work would inherit whichever brand the last one happened to leave
      * behind.
+     *
+     * Clearing after each unit of work rather than before the next one is what
+     * keeps this out of the way of anything that activates a brand as a job
+     * starts, Spatie's tenant switch included.
      */
     private function forgetBrandBetweenUnitsOfWork(): void
     {

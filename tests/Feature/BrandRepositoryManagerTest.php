@@ -8,7 +8,6 @@ use Byrcsc\Whitelabel\Contracts\BrandRepository;
 use Byrcsc\Whitelabel\Drivers\CachedBrandRepository;
 use Byrcsc\Whitelabel\Drivers\ConfigBrandRepository;
 use Byrcsc\Whitelabel\Tests\Fixtures\ArrayBrandRepository;
-use InvalidArgumentException;
 
 it('resolves the config driver by default', function (): void {
     expect(app(BrandRepository::class))->toBeInstanceOf(ConfigBrandRepository::class);

@@ -31,3 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A caching layer in front of every writable driver: per-brand entries stored
   forever, a domain index, and invalidation on write.
 - The `whitelabel:clear` command.
+- The Spatie Multitenancy integration: the `ProvidesBrand` interface,
+  `SwitchTenantBrandTask`, and a `TenantResolver` that reads the current tenant
+  without naming a Spatie class.

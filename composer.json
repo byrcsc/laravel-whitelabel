@@ -46,7 +46,8 @@
         "pestphp/pest-plugin-laravel": "^3.1||^4.0",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan-deprecation-rules": "^2.0",
-        "phpstan/phpstan-phpunit": "^2.0"
+        "phpstan/phpstan-phpunit": "^2.0",
+        "spatie/laravel-multitenancy": "^4.0"
     },
     "suggest": {
         "spatie/laravel-multitenancy": "Activate a brand whenever a tenant becomes current (^4.0)."
