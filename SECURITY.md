@@ -16,7 +16,7 @@ problem.
 
 Report it privately through
 [GitHub security advisories](https://github.com/byrcsc/laravel-whitelabel/security/advisories/new),
-or by email to developer@code-vertical.com.
+or by email to ryan@ryancatapang.com.
 
 Include what you can: affected version, a description of the issue, and the
 steps to reproduce it. A proof of concept helps but is not required.

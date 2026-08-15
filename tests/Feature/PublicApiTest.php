@@ -55,10 +55,10 @@ use ReflectionMethod;
 /**
  * The public API, frozen.
  *
- * Every class and method here is documented in `README.md` and covered by the
- * versioning promise in `CONTRIBUTING.md`: it cannot be removed or renamed
- * without a new major version. Removing one of these breaks this test, which
- * is the point.
+ * Every class and method here is documented in the versioned public API
+ * reference and covered by the versioning promise in `CONTRIBUTING.md`: it
+ * cannot be removed or renamed without a new major version. Removing one of
+ * these breaks this test, which is the point.
  *
  * Adding to the package does not break this test. That is deliberate — the
  * test says what may not disappear, not what may not appear.
@@ -334,7 +334,7 @@ class PublicApiTest extends TestCase
      * Not a guard against internals leaking — the list below is the same one
      * the test declares. It is a guard against *forgetting*: adding a public
      * method to the manager fails here until it is listed above, which means
-     * documenting it in the README.
+     * documenting it in the public API reference.
      */
     #[Test]
     public function every_public_manager_method_is_declared_public_api(): void

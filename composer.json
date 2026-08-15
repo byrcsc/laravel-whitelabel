@@ -1,6 +1,6 @@
 {
     "name": "byrcsc/laravel-whitelabel",
-    "description": "Manage brands in Laravel: resolve the active brand at runtime and carry it into views, mail, notifications, and queued jobs.",
+    "description": "Manage white-label branding and settings across Laravel views, mail, notifications, and queued jobs.",
     "keywords": [
         "byrcsc",
         "laravel",
@@ -14,19 +14,21 @@
     "authors": [
         {
             "name": "Ryan Catapang",
-            "email": "developer@code-vertical.com",
-            "role": "Developer"
+            "email": "ryan@ryancatapang.com",
+            "role": "Full-Stack Engineer"
         }
     ],
     "support": {
         "issues": "https://github.com/byrcsc/laravel-whitelabel/issues",
-        "source": "https://github.com/byrcsc/laravel-whitelabel",
-        "docs": "https://github.com/byrcsc/laravel-whitelabel#readme"
+        "forum": "https://github.com/byrcsc/laravel-whitelabel/discussions",
+        "docs": "https://docs.rcsc.dev/laravel-whitelabel/v1/introduction",
+        "security": "https://github.com/byrcsc/laravel-whitelabel/security/policy",
+        "source": "https://github.com/byrcsc/laravel-whitelabel"
     },
     "funding": [
         {
-            "type": "github",
-            "url": "https://github.com/sponsors/byrcsc"
+            "type": "buy_me_a_coffee",
+            "url": "https://www.buymeacoffee.com/ryancatapang"
         }
     ],
     "require": {

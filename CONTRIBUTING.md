@@ -1,7 +1,6 @@
 # Contributing
 
-Thanks for wanting to help. This package is maintained by one person, so
-replies can take a while. Everything gets read.
+Thanks for helping improve Laravel Whitelabel.
 
 ## Before you start
 
@@ -14,8 +13,7 @@ replies can take a while. Everything gets read.
   [SECURITY.md](SECURITY.md).
 
 Check the "Out of scope" section of the README before proposing a feature.
-Some things are deliberately excluded and will be declined no matter how good
-the implementation is.
+Changes to those boundaries will not be accepted as feature requests.
 
 ## Setup
 
@@ -34,6 +32,8 @@ composer build
 php vendor/bin/testbench serve
 ```
 
+Run `composer clear` to remove the generated Testbench application.
+
 ## The three checks
 
 A pull request needs all three of these green. CI runs the same commands.
@@ -48,16 +48,23 @@ Run `composer format` last so it does not fight with your editor.
 
 ## Pull requests
 
-- One concern per pull request. Small is easier to review than complete.
-- Add a test. A behaviour change without a test will be asked for one.
+- Keep each pull request focused on one concern.
+- Add a test for every behaviour change.
 - Add a line under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md) for anything
   a user would notice.
-- Public API additions need a line in `README.md` and an entry in the public
-  API surface test. If the README does not describe it, it is internal.
+- Public API additions need an entry in the versioned documentation and the
+  public API surface test. If the README or documentation does not describe
+  it, it is internal.
 - Keep the commit history readable. Squashing before review is fine.
+
+## Commits and branches
+
+Branch from `main` using `feat/`, `fix/`, `docs/`, `refactor/`, or `chore/`.
+Use [Conventional Commits](https://www.conventionalcommits.org/) for commit
+messages.
 
 ## What counts as a breaking change
 
-Anything documented in the README or the surface test is public API and is
-covered by semantic versioning. Everything else, including the internal
-Eloquent model, can change in a patch release.
+Anything documented in the README, versioned documentation, or surface test is
+public API and is covered by semantic versioning. Everything else, including
+the internal Eloquent model, can change in a patch release.

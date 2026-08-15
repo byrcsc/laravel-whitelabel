@@ -19,8 +19,6 @@ use Illuminate\Support\Facades\URL;
  * get their values. Every method answers with nothing when there is no brand,
  * or no such value on it, and the component then renders exactly what Laravel
  * would have rendered.
- *
- * @internal
  */
 final class BrandedMarkdown
 {
